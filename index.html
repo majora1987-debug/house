@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adam's Place — House Showcase, Blueprint & Gift Wishlist</title>
+  <meta name="description" content="Explore bare room planning perspectives, electrical & utility blueprints, project updates, and gift ideas for Adam's new home.">
+  
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Firebase Compat SDKs (Loaded from Google CDN; app falls back cleanly offline if disconnected) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a class="brand" href="#rooms">
+        <img class="brand-icon" src="assets/icons/favicon.svg" alt="House Icon">
+        <div class="brand-title">
+          Adam's Place
+          <span class="brand-badge">Soldiers Hill</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a class="nav-link active" data-route="rooms" href="#rooms">🏠 <span>Rooms</span></a></li>
+          <li><a class="nav-link" data-route="blueprint" href="#blueprint">📐 <span>Blueprint &amp; Utilities</span></a></li>
+          <li><a class="nav-link" data-route="wishlist" href="#wishlist">🎁 <span>Wishlist</span></a></li>
+          <li><a class="nav-link" data-route="timeline" href="#timeline">⏱️ <span>Project Log</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="admin-pill" id="adminAuthBtn" title="Admin access for Adam">
+          🔒 Admin Login
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="site-content">
+
+    <!-- Admin Status Banner (Visible only when logged in as majora1987@gmail.com) -->
+    <div class="admin-bar hidden" id="adminModeBanner">
+      <div class="admin-bar-info">
+        <span>👑</span>
+        <span>Admin Mode Active (majora1987@gmail.com) — You can edit room descriptions, add project updates, and manage wishlist items.</span>
+      </div>
+      <div class="admin-actions">
+        <button class="btn-primary" onclick="window.location.hash='#timeline'; document.getElementById('addTimelineUpdateBtn').click();">+ Post Update</button>
+      </div>
+    </div>
+
+    <!-- 1. ROOMS HUB VIEW -->
+    <section id="roomsView">
+      <div class="hero-banner">
+        <div class="hero-tag">Home Showcase &amp; Space Planning</div>
+        <h1 class="hero-title">Welcome to Adam's New Home</h1>
+        <p class="hero-subtitle">
+          3 Bed &bull; 2 Bath &bull; 1 Car in Soldiers Hill, VIC. Explore room-by-room clean planning views, track DIY &amp; utility projects, inspect technical specs, and check out housewarming gift ideas.
+        </p>
+        <div class="hero-pills">
+          <span class="hero-pill">✨ 13 Cleaned Bare Views</span>
+          <span class="hero-pill">⚡ 40A Single-Phase Supply</span>
+          <span class="hero-pill">❄️ Split-System &amp; Ducted Heating</span>
+          <span class="hero-pill">🎁 Gift Wishlist Active</span>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">Explore Rooms &amp; Spaces</h2>
+      </div>
+
+      <div class="room-grid" id="roomsGrid">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- 2. ROOM DETAIL VIEW -->
+    <section id="roomDetailView" class="hidden">
+      <div class="room-view-container">
+        <div>
+          <button class="back-btn" onclick="location.hash='#rooms'">&larr; Back to All Rooms</button>
+        </div>
+
+        <div class="room-detail-hero">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <h1 style="font-size: 1.85rem; font-weight: 800;" id="roomDetailTitle">Room Title</h1>
+                <span class="brand-badge" id="roomBadge">Badge</span>
+              </div>
+              <div style="color: var(--text-muted); font-size: 1rem;" id="roomDetailSub">Subtitle</div>
+            </div>
+          </div>
+
+          <!-- Main Gallery Photo -->
+          <div class="room-gallery-main" id="roomGalleryMain" title="Click photo to enlarge">
+            <img id="roomMainImg" src="" alt="Room Perspective">
+            <div class="gallery-caption-overlay">
+              <span id="roomMainCaption">Caption</span>
+              <span style="font-size: 0.8rem; opacity: 0.85;">🔍 Click to zoom</span>
+            </div>
+          </div>
+
+          <!-- Thumbnails Bar -->
+          <div class="room-thumbs-bar" id="roomThumbsBar">
+            <!-- Thumbs injected by app.js -->
+          </div>
+        </div>
+
+        <!-- Room Details & Timeline -->
+        <div class="room-columns">
+          <!-- Left Column: Vision & Design Notes -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="card-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">🛋️ Space Vision &amp; Interior Decorating</h3>
+                <button class="inline-edit-btn hidden" id="editVisionBtn">✏️ Edit Vision</button>
+              </div>
+              <p class="room-vision-text" id="roomVisionContent"></p>
+            </div>
+
+            <!-- In-Room Project Timeline -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">⏱️ Room Project Log</h3>
+                <button class="inline-edit-btn hidden" id="addRoomUpdateBtn">+ Add Update</button>
+              </div>
+              <div class="timeline-feed" id="roomUpdatesFeed">
+                <!-- Updates injected by app.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Specs & Utility Highlights -->
+          <div>
+            <div class="card-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">⚡ Quick Room Specs</h3>
+              </div>
+              <div class="specs-list" id="roomSpecsList">
+                <!-- Specs injected by app.js -->
+              </div>
+              <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-subtle); font-size: 0.85rem;">
+                <a href="#blueprint" style="color: var(--primary); text-decoration: underline; font-weight: 600;">
+                  View Full Switchboard &amp; Utility Blueprint &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. HOUSE BLUEPRINT & UTILITIES VIEW -->
+    <section id="blueprintView" class="hidden">
+      <div class="blueprint-container">
+        <div>
+          <button class="back-btn" onclick="location.hash='#rooms'">&larr; Back to Rooms</button>
+          <h1 style="font-size: 1.85rem; font-weight: 800; margin-top: 8px;">House Blueprint &amp; Technical Utilities</h1>
+          <p style="color: var(--text-muted); font-size: 1rem; margin-top: 4px;">
+            Engineering details of electrical capacity, lighting circuits, ceiling fan compatibility, and heating/cooling infrastructure.
+          </p>
+        </div>
+
+        <!-- Section 1: Electrical Switchboard -->
+        <div class="diagram-card">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 1.3rem; font-weight: 700;">⚡ Entry Switchboard (PDL DBF 15)</h3>
+              <div style="color: var(--text-muted); font-size: 0.88rem; margin-top: 2px;">
+                Single Phase 40A Supply &bull; AS/NZS 3439.3 Compliant &bull; Located behind front entrance door
+              </div>
+            </div>
+            <span class="hero-pill" style="border-color: #34d399; color: #34d399;">✨ 4 Spare DIN Poles Available</span>
+          </div>
+
+          <div class="diagram-media">
+            <img src="assets/photos/electrical/switchboard-panel.jpg" alt="PDL DBF 15 Switchboard Panel with circuit breakers" style="cursor: pointer;" onclick="window.appOpenLightbox('assets/photos/electrical/switchboard-panel.jpg', 'PDL DBF 15 Switchboard with 40A Main, dual 30mA RCDs, and 4 spare poles')">
+          </div>
+
+          <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 16px;">
+            The switchboard is configured with a <strong>40A Main Switch</strong> (<tt>LANMCB6140</tt>), a dedicated 20A Wall Oven circuit, two <strong>40A 30mA Legrand RCD Safety Switches</strong> protecting split power and lighting circuits, a dedicated 20A Clipsal breaker for the living room split-system AC, and <strong>4 empty DIN rail slots</strong> under modular blanks. Multiple Earthed Neutral (MEN) connection and earth electrode are located at the site meter pillar outside.
+          </p>
+
+          <div class="circuit-table-wrap">
+            <table class="circuit-table">
+              <thead>
+                <tr>
+                  <th>Pole #</th>
+                  <th>Circuit Name</th>
+                  <th>Rating</th>
+                  <th>Protection</th>
+                  <th>Scope &amp; Coverage</th>
+                </tr>
+              </thead>
+              <tbody id="circuitTableBody">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 2: Ceiling Fans & Lighting Hardware -->
+        <div class="blueprint-grid">
+          <div class="diagram-card">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 12px;">💡 Ceiling Fans &amp; B22 Oyster Bases</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <img src="assets/photos/lighting/oyster-b22-base.jpg" alt="Ceiling oyster base" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer;" onclick="window.appOpenLightbox('assets/photos/lighting/oyster-b22-base.jpg', 'Brushed metal oyster mounting base')">
+              <img src="assets/photos/lighting/b22-socket-contacts.jpg" alt="B22 socket contacts" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer;" onclick="window.appOpenLightbox('assets/photos/lighting/b22-socket-contacts.jpg', 'Standard Australian B22 bayonet socket contacts')">
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+              Every bedroom and the living room feature standard surface-mounted flush oyster bases with <strong>B22 bayonet fittings</strong>. Because modern DC ceiling fans draw only ~30W (0.15A–0.2A) and use wireless remotes, they can replace these existing light points directly onto the joists with <strong>zero wall wiring or plaster chasing</strong>.
+            </p>
+          </div>
+
+          <div class="diagram-card">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 12px;">🔦 Kitchen Recessed Downlights</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <img src="assets/photos/lighting/downlight-canister-socket.jpg" alt="Downlight canister" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer;" onclick="window.appOpenLightbox('assets/photos/lighting/downlight-canister-socket.jpg', 'Ceiling cutout and ceramic bi-pin connector')">
+              <img src="assets/photos/lighting/downlight-bi-pin-plug.jpg" alt="Downlight bulb and plug" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer;" onclick="window.appOpenLightbox('assets/photos/lighting/downlight-bi-pin-plug.jpg', 'Recessed downlight bi-pin lamp and trim ring')">
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+              Kitchen and task zones utilize spring-retained recessed ceiling canisters with <strong>MR16 / GU5.3 ceramic bi-pin sockets</strong>. These can easily be popped down to upgrade to modern integrated tri-colour dimmable LEDs whenever desired.
+            </p>
+          </div>
+        </div>
+
+        <!-- Section 3: Climate & Heating Infrastructure -->
+        <div class="diagram-card">
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;">❄️ Heating &amp; Air Conditioning Strategy</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div style="background: var(--bg-elevated); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #fbbf24;">🔥 Brivis Gas Ducted Heating</h4>
+              <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.55;">
+                Circular ceiling discharge vents in all 3 bedrooms, living, and bathroom, connected to the large return-air intake grille in the central entry hallway. Delivers rapid whole-house heating during cold Ballarat winters.
+              </p>
+            </div>
+            <div style="background: var(--bg-elevated); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #60a5fa;">❄️ Reverse-Cycle Split System AC</h4>
+              <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.55;">
+                Wall-mounted split system installed high on the living area courtyard wall, running on its own dedicated 20A Clipsal circuit. Ceiling fans in bedrooms will pull cool air down the hallway to cool the sleeping zones efficiently.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. HOUSE WISHLIST & GIFT REGISTRY VIEW -->
+    <section id="wishlistView" class="hidden">
+      <div class="wishlist-container">
+        <div>
+          <button class="back-btn" onclick="location.hash='#rooms'">&larr; Back to Rooms</button>
+          <h1 style="font-size: 1.85rem; font-weight: 800; margin-top: 8px;">House Wishlist &amp; Gift Registry</h1>
+          <p style="color: var(--text-muted); font-size: 1rem; margin-top: 4px;">
+            A curated list of things for the house. Friends &amp; family asked for gift ideas, so here's what's on the wishlist organized by priority!
+          </p>
+        </div>
+
+        <div class="wishlist-intro-card">
+          <h3>🎁 Tips for Friends &amp; Family</h3>
+          <p>
+            Items are categorized by priority below. Once something has been bought or gifted, it moves into <strong>&ldquo;Purchased / Claimed&rdquo;</strong> to prevent duplicate gifts. Feel free to browse example links or suggest alternatives!
+          </p>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <!-- Filter Chips -->
+          <div class="filter-bar">
+            <button class="filter-chip chip-btn active" data-status="all">All Items</button>
+            <button class="filter-chip chip-btn chip-must" data-status="must-have">🔴 Must Have</button>
+            <button class="filter-chip chip-btn chip-nice" data-status="nice-to-have">🟡 Nice to Have</button>
+            <button class="filter-chip chip-btn chip-could" data-status="could-have">🔵 Could Have</button>
+            <button class="filter-chip chip-btn chip-purchased" data-status="purchased">🟢 Purchased / Claimed</button>
+          </div>
+
+          <button class="btn-primary hidden" id="addWishlistBtn">+ Add Gift Idea</button>
+        </div>
+
+        <div class="wishlist-grid" id="wishlistGrid">
+          <!-- Wishlist items injected by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MASTER TIMELINE VIEW -->
+    <section id="timelineView" class="hidden">
+      <div class="wishlist-container">
+        <div>
+          <button class="back-btn" onclick="location.hash='#rooms'">&larr; Back to Rooms</button>
+          <h1 style="font-size: 1.85rem; font-weight: 800; margin-top: 8px;">Master Project Timeline</h1>
+          <p style="color: var(--text-muted); font-size: 1rem; margin-top: 4px;">
+            Chronological log of property inspections, space planning, installations, and interior decorating updates.
+          </p>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Filter by Room:</label>
+            <select class="form-select" id="timelineRoomFilter" style="padding: 6px 12px; font-size: 0.88rem;">
+              <option value="all">All Rooms &amp; Blueprint</option>
+              <option value="living-dining">Open Living &amp; Dining</option>
+              <option value="lounge-media">Lounge &amp; Media</option>
+              <option value="master-bedroom">Master Bedroom</option>
+              <option value="bedroom-2">Bedroom 2</option>
+              <option value="studio-office">Bedroom 3 (Studio)</option>
+              <option value="blueprint">Blueprint &amp; Utilities</option>
+            </select>
+          </div>
+
+          <button class="btn-primary hidden" id="addTimelineUpdateBtn">+ Post Project Note</button>
+        </div>
+
+        <div class="timeline-feed" id="masterTimelineFeed" style="margin-top: 24px;">
+          <!-- Injected by app.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="lightbox-backdrop" id="lightboxBackdrop">
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="lightboxCloseBtn">&times;</button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="Enlarged Photo">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN MODAL: Add / Edit Project Update -->
+  <div class="modal-backdrop" id="updateModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">⏱️ Add Project Update</h3>
+        <button class="modal-close-btn" id="closeUpdateModalBtn">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Update Title</label>
+        <input class="form-input" id="updateTitleInput" placeholder="e.g. Purchased Master Bedroom Ceiling Fan">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Room / Zone</label>
+          <select class="form-select" id="updateRoomSelect">
+            <option value="living-dining">Open Living &amp; Dining</option>
+            <option value="lounge-media">Lounge &amp; Media</option>
+            <option value="master-bedroom">Master Bedroom &amp; Ensuite</option>
+            <option value="bedroom-2">Bedroom 2 (Guest)</option>
+            <option value="studio-office">Bedroom 3 (Studio / Office)</option>
+            <option value="hallway-entry">Hallway &amp; Entry</option>
+            <option value="blueprint">Blueprint &amp; Utilities</option>
+            <option value="general">General House</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status Tag</label>
+          <select class="form-select" id="updateStatusSelect">
+            <option value="Planning">Planning</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Idea">Idea</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Project Note &amp; Details</label>
+        <textarea class="form-textarea" id="updateContentInput" placeholder="Describe the update, measurements, sparky quotes, product model, etc..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelUpdateModalBtn">Cancel</button>
+        <button class="btn-primary" id="saveUpdateModalBtn">Publish Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN MODAL: Edit Room Vision -->
+  <div class="modal-backdrop" id="visionModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🛋️ Edit Room Vision</h3>
+        <button class="modal-close-btn" id="closeVisionModalBtn">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Room Vision &amp; Decorating Ideas</label>
+        <textarea class="form-textarea" id="visionTextarea" style="min-height: 180px;" placeholder="Describe furniture arrangement, styling ideas, layout plans..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelVisionModalBtn">Cancel</button>
+        <button class="btn-primary" id="saveVisionModalBtn">Save Vision</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN MODAL: Add Wishlist Item -->
+  <div class="modal-backdrop" id="wishlistModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🎁 Add Item to Wishlist</h3>
+        <button class="modal-close-btn" id="closeWlModalBtn">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Item Name</label>
+        <input class="form-input" id="wlNameInput" placeholder="e.g. Fanco Eco Motion 52'' DC Ceiling Fan">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Target Room</label>
+          <select class="form-select" id="wlRoomSelect">
+            <option value="General">General / Whole House</option>
+            <option value="Living &amp; Dining">Living &amp; Dining</option>
+            <option value="Kitchen">Kitchen</option>
+            <option value="Master Bedroom">Master Bedroom</option>
+            <option value="Bedroom 2">Bedroom 2</option>
+            <option value="Studio (Bed 3)">Studio (Bed 3)</option>
+            <option value="Courtyard">Courtyard Garden</option>
+            <option value="Garage">Garage / Workshop</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Priority Status</label>
+          <select class="form-select" id="wlStatusSelect">
+            <option value="must-have">🔴 Must Have</option>
+            <option value="nice-to-have">🟡 Nice to Have</option>
+            <option value="could-have">🔵 Could Have</option>
+            <option value="purchased">🟢 Purchased / Claimed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estimated Cost / Price Range (Optional)</label>
+        <input class="form-input" id="wlCostInput" placeholder="e.g. $120–$160">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Example Link or Store (Optional)</label>
+        <input class="form-input" id="wlLinkInput" placeholder="https://www.bunnings.com.au/...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes &amp; Preferences</label>
+        <textarea class="form-textarea" id="wlNotesInput" placeholder="Specific colour, dimensions, wattage, or model preference..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelWlModalBtn">Cancel</button>
+        <button class="btn-primary" id="saveWlModalBtn">Save to Wishlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-meta">
+      <div>
+        <strong>Adam's Place</strong> &bull; Soldiers Hill VIC &bull; Built with GitHub Pages &amp; Firebase
+      </div>
+      <div>
+        <a href="#rooms" style="color: var(--text-muted); text-decoration: none; margin-right: 14px;">Rooms</a>
+        <a href="#blueprint" style="color: var(--text-muted); text-decoration: none; margin-right: 14px;">Blueprint</a>
+        <a href="#wishlist" style="color: var(--text-muted); text-decoration: none; margin-right: 14px;">Wishlist</a>
+        <a href="#timeline" style="color: var(--text-muted); text-decoration: none;">Project Log</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="js/data-fallback.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // Global helper for opening lightbox from inline cards
+    window.appOpenLightbox = function(src, caption) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxCaption').textContent = caption || '';
+      document.getElementById('lightboxBackdrop').classList.add('open');
+    };
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "House Showcase & Burpee Pacer",
+        "supportEmail": "majora1987@gmail.com"
+      }
+    }
+  }
+}

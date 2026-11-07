@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Burpee Pacer private workouts (preserved)
+    match /users/{userId}/workouts/{workoutId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 2. House Showcase: Public read, admin-only write
+    match /house_rooms/{roomId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == "majora1987@gmail.com";
+    }
+    match /house_updates/{updateId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == "majora1987@gmail.com";
+    }
+    match /house_wishlist/{itemId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == "majora1987@gmail.com";
+    }
+  }
+}
