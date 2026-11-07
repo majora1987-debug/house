@@ -1,4 +1,5 @@
 // Main Single Page Application Controller for Adam's House Showcase
+// Unslopped craft-first architecture
 
 (function() {
   "use strict";
@@ -29,12 +30,10 @@
     if (!isoStr) return "";
     const d = new Date(isoStr);
     if (isNaN(d.getTime())) return isoStr;
-    return d.toLocaleDateString(undefined, {
+    return d.toLocaleDateString("en-AU", {
       year: "numeric",
       month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
+      day: "numeric"
     });
   }
 
@@ -105,6 +104,11 @@
     const container = $("roomsGrid");
     if (!container) return;
 
+    const countLabel = $("roomsCountLabel");
+    if (countLabel) {
+      countLabel.textContent = `${currentRooms.length} Planning Zones`;
+    }
+
     let html = "";
     currentRooms.forEach(room => {
       const photosCount = room.gallery ? room.gallery.length : 1;
@@ -112,16 +116,18 @@
         <div class="room-card" onclick="location.hash='#room/${room.id}'">
           <div class="room-card-media">
             <img src="${room.heroImage}" alt="${escapeHtml(room.name)}" loading="lazy">
-            <span class="room-badge-overlay">${escapeHtml(room.badge)}</span>
-            <span class="room-photos-count">📷 ${photosCount} views</span>
+            <span class="room-index-tag">${escapeHtml(room.badge)}</span>
+            <span class="room-photos-count">${photosCount} ${photosCount === 1 ? 'view' : 'views'}</span>
           </div>
           <div class="room-card-body">
-            <h3 class="room-card-name">${escapeHtml(room.name)}</h3>
-            <div class="room-card-sub">${escapeHtml(room.subtitle)}</div>
+            <div class="room-card-header">
+              <h3 class="room-card-name">${escapeHtml(room.name)}</h3>
+              <div class="room-card-sub">${escapeHtml(room.subtitle)}</div>
+            </div>
             <p class="room-card-vision">${escapeHtml(room.vision)}</p>
             <div class="room-card-footer">
-              <span>Bare Planning Canvas</span>
-              <span class="room-card-cta">Explore Room &rarr;</span>
+              <span class="room-card-status">Bare Canvas</span>
+              <span class="room-card-cta">Inspect &rarr;</span>
             </div>
           </div>
         </div>
@@ -226,8 +232,8 @@
 
     if (!roomUpdates.length) {
       updatesContainer.innerHTML = `
-        <div style="color: var(--text-muted); font-size: 0.9rem; padding: 12px 0;">
-          No logged projects yet for this room. Use the admin button above to add the first update.
+        <div style="color: var(--text-muted); font-size: 13px; padding: 12px 0;">
+          No logged projects yet for this room.
         </div>
       `;
       return;
@@ -249,7 +255,7 @@
             <div class="timeline-item-content">${escapeHtml(u.content)}</div>
             ${isAdmin ? `
               <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')" title="Delete update">🗑️ Delete</button>
+                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')" title="Delete update">Delete</button>
               </div>
             ` : ''}
           </div>
@@ -271,12 +277,12 @@
       bp.switchboard.circuits.forEach(c => {
         const isSpare = String(c.pole).includes("12-15") || c.name.includes("SPARE");
         rowsHtml += `
-          <tr style="${isSpare ? 'background: rgba(16, 185, 129, 0.08);' : ''}">
-            <td><strong>#${c.pole}</strong></td>
+          <tr class="${isSpare ? 'spare-row' : ''}">
+            <td><strong style="font-family: var(--font-mono);">#${c.pole}</strong></td>
             <td><strong>${escapeHtml(c.name)}</strong></td>
             <td><span class="timeline-badge badge-planning">${escapeHtml(c.rating)}</span></td>
             <td>${escapeHtml(c.rcd)}</td>
-            <td>${isSpare ? '<span class="spare-tag">✨ 4 Spare DIN Poles Available</span>' : escapeHtml(c.scope)}</td>
+            <td>${isSpare ? '<span class="spare-tag">4 Spare DIN Poles Available</span>' : escapeHtml(c.scope)}</td>
           </tr>
         `;
       });
@@ -300,8 +306,8 @@
 
     if (!filtered.length) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
-          No items found in this category.
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 48px 0; font-size: 13.5px;">
+          No items recorded in this category.
         </div>
       `;
       return;
@@ -316,22 +322,23 @@
       html += `
         <div class="wishlist-card ${isPurchased ? 'purchased-card' : ''}">
           <div class="wishlist-card-top">
-            <span class="wishlist-room-tag">📍 ${escapeHtml(item.room)}</span>
+            <span class="wishlist-room-tag">${escapeHtml(item.room)}</span>
             <span class="wishlist-status-pill ${statusClass}">${escapeHtml(statusLabel)}</span>
           </div>
           <h4 class="wishlist-card-name">${escapeHtml(item.name)}</h4>
           <p class="wishlist-card-notes">${escapeHtml(item.notes)}</p>
           <div class="wishlist-card-footer">
             <span class="wishlist-cost">${escapeHtml(item.estCost || '')}</span>
-            ${item.link ? `<a class="wishlist-link" href="${item.link}" target="_blank" rel="noopener">Browse Example &rarr;</a>` : '<span></span>'}
+            ${item.link ? `<a class="wishlist-link" href="${item.link}" target="_blank" rel="noopener">Supplier Link &nearr;</a>` : '<span></span>'}
           </div>
           ${isAdmin ? `
             <div class="wishlist-admin-ctrls">
-              <span style="font-size: 0.72rem; color: var(--text-subtle);">Change Status:</span>
+              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Set:</span>
               <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'must-have')">Must</button>
               <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'nice-to-have')">Nice</button>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'purchased')">✓ Purchased</button>
-              <button class="inline-delete-btn" style="margin-left: auto;" onclick="window.appDeleteWishlist('${item.id}')">🗑️</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'could-have')">Could</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'purchased')">Claimed</button>
+              <button class="inline-delete-btn" style="margin-left: auto;" onclick="window.appDeleteWishlist('${item.id}')">Remove</button>
             </div>
           ` : ''}
         </div>
@@ -355,14 +362,14 @@
     $("addTimelineUpdateBtn").classList.toggle("hidden", !isAdmin);
 
     if (!filtered.length) {
-      container.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No updates logged yet.</div>`;
+      container.innerHTML = `<div style="color: var(--text-muted); padding: 24px 0; font-size: 13.5px;">No project entries recorded for this selection.</div>`;
       return;
     }
 
     let html = "";
     filtered.forEach(u => {
       const room = currentRooms.find(r => r.id === u.roomId);
-      const roomName = room ? room.name : (u.roomId === "blueprint" ? "House Blueprint & Utilities" : "General");
+      const roomName = room ? room.name : (u.roomId === "blueprint" ? "House Blueprint & Utilities" : "General House");
       const badgeClass = `badge-${(u.status || 'planning').toLowerCase().replace(/\s+/g, '-')}`;
 
       html += `
@@ -370,14 +377,14 @@
           <div class="timeline-dot"></div>
           <div class="timeline-item-card">
             <div class="timeline-meta">
-              <span class="timeline-date">${formatDate(u.date)} &bull; <strong style="color: var(--primary);">${escapeHtml(roomName)}</strong></span>
+              <span class="timeline-date">${formatDate(u.date)} &bull; <strong style="color: var(--text-primary);">${escapeHtml(roomName)}</strong></span>
               <span class="timeline-badge ${badgeClass}">${escapeHtml(u.status)}</span>
             </div>
             <h4 class="timeline-item-title">${escapeHtml(u.title)}</h4>
             <div class="timeline-item-content">${escapeHtml(u.content)}</div>
             ${isAdmin ? `
               <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')">🗑️ Delete</button>
+                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')">Delete</button>
               </div>
             ` : ''}
           </div>
@@ -418,7 +425,7 @@
     const roomId = $("updateRoomSelect").value;
 
     if (!title) {
-      alert("Please enter an update title.");
+      alert("Please enter a title for the update.");
       return;
     }
 
@@ -495,7 +502,7 @@
 
   // Global window functions for inline onclick handlers
   window.appDeleteUpdate = async function(id) {
-    if (!confirm("Are you sure you want to delete this project update?")) return;
+    if (!confirm("Delete this project update?")) return;
     await window.HouseDB.deleteUpdate(id);
     if (currentRoute === "room" && activeRoomId) {
       await renderRoomUpdates(activeRoomId);
@@ -510,7 +517,7 @@
   };
 
   window.appDeleteWishlist = async function(id) {
-    if (!confirm("Delete this wishlist item?")) return;
+    if (!confirm("Delete this item from the wishlist?")) return;
     await window.HouseDB.deleteWishlistItem(id);
     await renderWishlist();
   };
@@ -578,11 +585,17 @@
     window.HouseAuth.onAuth((user, isAdmin) => {
       if (isAdmin) {
         adminBtn.classList.add("logged-in");
-        adminBtn.innerHTML = `👑 Admin Mode <span class="admin-pill-dot"></span>`;
+        adminBtn.innerHTML = `
+          <span class="admin-pill-dot"></span>
+          <span>Admin Active</span>
+        `;
         $("adminModeBanner").classList.remove("hidden");
       } else {
         adminBtn.classList.remove("logged-in");
-        adminBtn.innerHTML = `🔒 Admin Login`;
+        adminBtn.innerHTML = `
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Admin Access</span>
+        `;
         $("adminModeBanner").classList.add("hidden");
       }
 
