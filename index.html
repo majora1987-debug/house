@@ -11,6 +11,26 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#12110f">
 
+  <!-- Ensure no legacy Service Workers from other localhost projects (e.g. Burpee Pacer PWA) hijack this app -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          if (name.includes('burpee')) {
+            caches.delete(name);
+          }
+        }
+      });
+    }
+  </script>
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/admin.css">
