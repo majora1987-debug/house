@@ -4,7 +4,7 @@
 window.DEFAULT_DATA = {
   houseInfo: {
     title: "Adam's Place",
-    subtitle: "House Showcase, Project Log & Gift Wishlist",
+    subtitle: "House Showcase, Project Log & Wishlist",
     tagline: "3 Bed · 2 Bath · 1 Car · Soldiers Hill VIC",
     settlementDate: "October 2026",
     overview: "A modern, low-maintenance 3-bedroom brick home in Soldiers Hill, featuring an open-plan kitchen and living zone, private master suite, dedicated creative/sim studio, and ducted heating."

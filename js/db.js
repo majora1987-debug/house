@@ -169,7 +169,7 @@
     const id = generateId("wl-");
     const record = {
       id,
-      name: item.name || "Gift Idea",
+      name: item.name || "Wishlist Item",
       room: item.room || "General",
       status: item.status || "must-have", // must-have | nice-to-have | could-have | purchased
       notes: item.notes || "",

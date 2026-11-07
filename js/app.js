@@ -315,7 +315,7 @@
     if (!currentWishlist.length) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 56px 0; font-size: 14px;">
-          The wishlist is currently empty. ${isAdmin ? 'Use "+ Add Item" above to start adding items.' : 'Check back soon for gift ideas and home essentials.'}
+          The wishlist is currently empty. ${isAdmin ? 'Use "+ Add Item" above to start adding items.' : 'Check back soon to see items on the wishlist.'}
         </div>
       `;
       return;
@@ -359,7 +359,7 @@
               <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'must-have')">Must</button>
               <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'nice-to-have')">Nice</button>
               <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'could-have')">Could</button>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'purchased')">Claimed</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'purchased')">Purchased</button>
               <button class="inline-delete-btn" style="margin-left: auto;" onclick="window.appDeleteWishlist('${safeId(item.id)}')">Remove</button>
             </div>
           ` : ''}
