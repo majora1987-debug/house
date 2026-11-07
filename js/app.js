@@ -37,6 +37,19 @@
     });
   }
 
+  function safeUrl(url) {
+    if (!url) return "";
+    const trimmed = String(url).trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      return escapeHtml(trimmed);
+    }
+    return "";
+  }
+
+  function safeId(id) {
+    return String(id || "").replace(/[^a-zA-Z0-9_-]/g, "");
+  }
+
   // --- Router ---
   function parseHash() {
     const hash = window.location.hash.replace(/^#\/?/, "");
@@ -255,7 +268,7 @@
             <div class="timeline-item-content">${escapeHtml(u.content)}</div>
             ${isAdmin ? `
               <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')" title="Delete update">Delete</button>
+                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${safeId(u.id)}')" title="Delete update">Delete</button>
               </div>
             ` : ''}
           </div>
@@ -299,6 +312,15 @@
     const isAdmin = window.HouseAuth.isAdmin();
     $("addWishlistBtn").classList.toggle("hidden", !isAdmin);
 
+    if (!currentWishlist.length) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 56px 0; font-size: 14px;">
+          The wishlist is currently empty. ${isAdmin ? 'Use "+ Add Item" above to start adding items.' : 'Check back soon for gift ideas and home essentials.'}
+        </div>
+      `;
+      return;
+    }
+
     const filtered = currentWishlist.filter(item => {
       if (wishlistFilter === "all") return true;
       return item.status === wishlistFilter;
@@ -307,7 +329,7 @@
     if (!filtered.length) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 48px 0; font-size: 13.5px;">
-          No items recorded in this category.
+          No items found with status &ldquo;${escapeHtml(wishlistFilter.replace(/-/g, " "))}&rdquo;.
         </div>
       `;
       return;
@@ -329,16 +351,16 @@
           <p class="wishlist-card-notes">${escapeHtml(item.notes)}</p>
           <div class="wishlist-card-footer">
             <span class="wishlist-cost">${escapeHtml(item.estCost || '')}</span>
-            ${item.link ? `<a class="wishlist-link" href="${item.link}" target="_blank" rel="noopener">Supplier Link &nearr;</a>` : '<span></span>'}
+            ${safeUrl(item.link) ? `<a class="wishlist-link" href="${safeUrl(item.link)}" target="_blank" rel="noopener noreferrer">Supplier Link &nearr;</a>` : '<span></span>'}
           </div>
           ${isAdmin ? `
             <div class="wishlist-admin-ctrls">
               <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Set:</span>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'must-have')">Must</button>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'nice-to-have')">Nice</button>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'could-have')">Could</button>
-              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${item.id}', 'purchased')">Claimed</button>
-              <button class="inline-delete-btn" style="margin-left: auto;" onclick="window.appDeleteWishlist('${item.id}')">Remove</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'must-have')">Must</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'nice-to-have')">Nice</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'could-have')">Could</button>
+              <button class="inline-edit-btn" onclick="window.appUpdateWishlist('${safeId(item.id)}', 'purchased')">Claimed</button>
+              <button class="inline-delete-btn" style="margin-left: auto;" onclick="window.appDeleteWishlist('${safeId(item.id)}')">Remove</button>
             </div>
           ` : ''}
         </div>
@@ -384,7 +406,7 @@
             <div class="timeline-item-content">${escapeHtml(u.content)}</div>
             ${isAdmin ? `
               <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${u.id}')">Delete</button>
+                <button class="inline-delete-btn" onclick="window.appDeleteUpdate('${safeId(u.id)}')">Delete</button>
               </div>
             ` : ''}
           </div>

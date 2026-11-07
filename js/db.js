@@ -140,7 +140,7 @@
 
   // --- Wishlist / Gift Registry ---
   async function getWishlist() {
-    const fallback = window.DEFAULT_DATA ? window.DEFAULT_DATA.initialWishlist : [];
+    const fallback = window.DEFAULT_DATA && Array.isArray(window.DEFAULT_DATA.initialWishlist) ? window.DEFAULT_DATA.initialWishlist : [];
     const db = window.HouseAuth.getDb();
 
     if (!db) {
@@ -150,7 +150,8 @@
     try {
       const snapshot = await db.collection("house_wishlist").get();
       if (snapshot.empty) {
-        return fallback;
+        setLocal(LOCAL_WISHLIST_KEY, []);
+        return [];
       }
       const list = [];
       snapshot.forEach(doc => {

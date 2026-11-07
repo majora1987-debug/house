@@ -1,5 +1,18 @@
+# OS & IDE metadata
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary & Environment
 *.tmp
 *~
-.idea
-.vscode
+.env
+.env.*
+*.pem
+*.key
+
+# Safeguard against accidental document uploads
+*.pdf
+*.docx
+*.xlsx
